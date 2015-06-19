@@ -45,7 +45,26 @@
     [alertView setContainerView:[self createDemoView]];
 
     // Modify the parameters
-    [alertView setButtonTitles:[NSMutableArray arrayWithObjects:@"Close1", @"Close2", @"Close3", nil]];
+//    [alertView setButtonTitles:[NSMutableArray arrayWithObjects:@"Close1", @"Close2", @"Close3", nil]];
+
+    [alertView addButtonWithTitle:@"Close1" styleHandler: ^void (UIButton *button) {
+        UIColor *normal = [UIColor redColor];
+        UIColor *hightlighted = [self hightlightedColor:normal];
+        [button setTitleColor: normal forState: UIControlStateNormal];
+        [button setTitleColor:hightlighted forState: UIControlStateHighlighted];
+    }];
+
+    [alertView addButtonWithTitle:@"Close2" styleHandler: ^void (UIButton *button) {
+        UIColor *normal = [UIColor greenColor];
+        UIColor *hightlighted = [self hightlightedColor:normal];
+        [button setTitleColor: normal forState: UIControlStateNormal];
+        [button setTitleColor: hightlighted forState: UIControlStateHighlighted];
+    }];
+    
+    [alertView addButtonWithTitle:@"Close3" styleHandler: ^void (UIButton *button) {
+        
+    }];
+    
     [alertView setDelegate:self];
     
     // You may use a Block, rather than a delegate.
@@ -75,6 +94,15 @@
     [demoView addSubview:imageView];
 
     return demoView;
+}
+
+- (UIColor *)hightlightedColor: (UIColor *)normal {
+    CGFloat a = 0;
+    CGFloat r = 0;
+    CGFloat g = 0;
+    CGFloat b = 0;
+    [normal getRed: &r green: &g blue: &b alpha: &a];
+    return [[UIColor alloc] initWithRed: r * 0.8 green: g * 0.8 blue: b* 0.8 alpha: a];
 }
 
 @end

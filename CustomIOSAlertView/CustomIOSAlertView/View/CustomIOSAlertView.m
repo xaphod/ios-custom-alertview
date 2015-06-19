@@ -22,6 +22,8 @@ const static CGFloat kCustomIOS7MotionEffectExtent                = 10.0;
 CGFloat buttonHeight = 0;
 CGFloat buttonSpacerHeight = 0;
 
+NSMutableArray *styleHandlers;
+
 @synthesize parentView, containerView, dialogView, onButtonTouchUpInside;
 @synthesize delegate;
 @synthesize buttonTitles;
@@ -45,13 +47,15 @@ CGFloat buttonSpacerHeight = 0;
 
         delegate = self;
         useMotionEffects = false;
-        buttonTitles = @[@"Close"];
         
         [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+        
+        styleHandlers = [[NSMutableArray alloc] init];
+        buttonTitles = [[NSMutableArray alloc] init];
     }
     return self;
 }
@@ -137,7 +141,7 @@ CGFloat buttonSpacerHeight = 0;
 }
 
 // Button has been touched
-- (IBAction)customIOS7dialogButtonTouchUpInside:(id)sender
+- (IBAction)dialogButtonTouchUpInside:(id)sender
 {
     if (delegate != NULL) {
         [delegate customIOS7dialogButtonTouchUpInside:self clickedButtonAtIndex:[sender tag]];
@@ -243,26 +247,32 @@ CGFloat buttonSpacerHeight = 0;
 // Helper function: add buttons to container
 - (void)addButtonsToView: (UIView *)container
 {
-    if (buttonTitles==NULL) { return; }
+    if ([buttonTitles count] == 0) {
+        [buttonTitles addObject:@"Close"];
+    }
 
     CGFloat buttonWidth = container.bounds.size.width / [buttonTitles count];
 
+    NSUInteger styleHandlersCount = [styleHandlers count];
     for (int i=0; i<[buttonTitles count]; i++) {
-
-        UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-
-        [closeButton setFrame:CGRectMake(i * buttonWidth, container.bounds.size.height - buttonHeight, buttonWidth, buttonHeight)];
-
-        [closeButton addTarget:self action:@selector(customIOS7dialogButtonTouchUpInside:) forControlEvents:UIControlEventTouchUpInside];
-        [closeButton setTag:i];
-
-        [closeButton setTitle:[buttonTitles objectAtIndex:i] forState:UIControlStateNormal];
-        [closeButton setTitleColor:[UIColor colorWithRed:0.0f green:0.5f blue:1.0f alpha:1.0f] forState:UIControlStateNormal];
-        [closeButton setTitleColor:[UIColor colorWithRed:0.2f green:0.2f blue:0.2f alpha:0.5f] forState:UIControlStateHighlighted];
-        [closeButton.titleLabel setFont:[UIFont boldSystemFontOfSize:14.0f]];
-        [closeButton.layer setCornerRadius:kCustomIOSAlertViewCornerRadius];
-
-        [container addSubview:closeButton];
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        [button setFrame:CGRectMake(i * buttonWidth, container.bounds.size.height - buttonHeight, buttonWidth, buttonHeight)];
+        [button addTarget:self action:@selector(dialogButtonTouchUpInside:) forControlEvents:UIControlEventTouchUpInside];
+        [button setTag:i];
+        [button setTitle:[buttonTitles objectAtIndex:i] forState:UIControlStateNormal];
+        
+        if (i < styleHandlersCount && styleHandlers[i] != nil) {
+            ButtonStyleHandler handler = (ButtonStyleHandler) styleHandlers[i];
+            handler(button);            
+        } else {
+            [button setTitleColor:[UIColor colorWithRed:0.0f green:0.5f blue:1.0f alpha:1.0f] forState:UIControlStateNormal];
+            [button setTitleColor:[UIColor colorWithRed:0.2f green:0.2f blue:0.2f alpha:0.5f]  forState:UIControlStateHighlighted];
+//            [button.titleLabel setFont:[UIFont boldSystemFontOfSize:14.0f]];
+        }
+        
+        [button.layer setCornerRadius:kCustomIOSAlertViewCornerRadius];
+        
+        [container addSubview:button];
     }
 }
 
@@ -441,6 +451,11 @@ CGFloat buttonSpacerHeight = 0;
 					 }
 					 completion:nil
 	 ];
+}
+
+- (void)addButtonWithTitle:(NSString *)title styleHandler: (ButtonStyleHandler) styleHandler {
+    [buttonTitles addObject:title];
+    [styleHandlers addObject:styleHandler];
 }
 
 @end
