@@ -13,7 +13,7 @@
 
 @protocol CustomIOSAlertViewDelegate
 
-- (void)customIOS7dialogButtonTouchUpInside:(id)alertView clickedButtonAtIndex:(NSInteger)buttonIndex;
+- (void)dialogButtonTouchUpInside:(id)alertView clickedButtonAtIndex:(NSInteger)buttonIndex;
 
 @end
 
