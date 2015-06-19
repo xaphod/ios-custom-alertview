@@ -49,7 +49,6 @@ UIColor *seperatorColor;
     if (self) {
         self.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
         
-        delegate = self;
         useMotionEffects = false;
         
         [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
@@ -133,14 +132,16 @@ UIColor *seperatorColor;
         [[[UIApplication sharedApplication] keyWindow] addSubview:self];
     }
     
-    dialogView.layer.opacity = 0.0f;
-    dialogView.layer.transform = CATransform3DMakeScale(1.0f, 1.0f, 1.0);
+    dialogView.layer.opacity = 1.0f;
+    dialogView.layer.transform = CATransform3DMakeScale(1.2f, 1.2f, 1.0f);
+    holeyView.holeFrame = dialogView.frame;
+    self.backgroundColor = [UIColor clearColor];
     
     [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
                          
-                         dialogView.layer.opacity = 1.0f;
                          dialogView.layer.transform = CATransform3DMakeScale(1, 1, 1);
+                         holeyView.holeFrame = dialogView.frame;
                          self.backgroundColor = dimColor;
                      }
                      completion:^(BOOL finished){
@@ -161,6 +162,8 @@ UIColor *seperatorColor;
     if (onButtonTouchUpInside != NULL) {
         onButtonTouchUpInside(self, (int)[sender tag]);
     }
+    
+    [self close];
 }
 
 // Default button behaviour
@@ -172,8 +175,6 @@ UIColor *seperatorColor;
 // Dialog close animation then cleaning and removing the view from the parent
 - (void)close
 {
-    CATransform3D currentTransform = dialogView.layer.transform;
-    
     if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_7_1) {
         CGFloat startRotation = [[dialogView valueForKeyPath:@"layer.transform.rotation.z"] floatValue];
         CATransform3D rotation = CATransform3DMakeRotation(-startRotation + M_PI * 270.0 / 180.0, 0.0f, 0.0f, 0.0f);
@@ -181,21 +182,17 @@ UIColor *seperatorColor;
         dialogView.layer.transform = CATransform3DConcat(rotation, CATransform3DMakeScale(1, 1, 1));
     }
     
-    dialogView.layer.opacity = 1.0f;
+    holeyView.layer.opacity = 0.0f;
+    for (UIView *v in [self subviews]) {
+        [v removeFromSuperview];
+    }
     self.backgroundColor = dimColor;
-    [holeyView removeFromSuperview];
     
-    [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionTransitionNone
+    [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionCurveEaseOut
                      animations:^{
-                         dialogView.layer.transform = CATransform3DConcat(currentTransform, CATransform3DMakeScale(1.0f, 1.0f, 1.0));
-                         dialogView.layer.opacity = 0.0f;
-                         holeyView.layer.opacity = 0.0f;
                          self.backgroundColor = [UIColor clearColor];
                      }
                      completion:^(BOOL finished) {
-                         for (UIView *v in [self subviews]) {
-                             [v removeFromSuperview];
-                         }
                          [self removeFromSuperview];
                      }
      ];
@@ -249,8 +246,8 @@ UIColor *seperatorColor;
             UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(dialogContainer.bounds.size.width / buttonTitles.count * i, dialogContainer.bounds.size.height - buttonHeight - buttonSpacerHeight, buttonSpacerHeight, buttonHeight)];
             verticalLineView.backgroundColor = seperatorColor;
             [dialogContainer addSubview:verticalLineView];
-            }
         }
+    }
     
     // Add the custom container if there is any
     [dialogContainer.contentView addSubview:containerView];
