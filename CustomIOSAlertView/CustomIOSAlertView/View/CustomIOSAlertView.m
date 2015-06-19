@@ -133,19 +133,19 @@ UIColor *seperatorColor;
     }
     
     dialogView.layer.opacity = 1.0f;
-    dialogView.layer.transform = CATransform3DMakeScale(1.2f, 1.2f, 1.0f);
-    holeyView.holeFrame = dialogView.frame;
+    dialogView.layer.transform = CATransform3DMakeScale(1.3f, 1.3f, 1.0f);
     self.backgroundColor = [UIColor clearColor];
     
     [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
                      animations:^{
                          
                          dialogView.layer.transform = CATransform3DMakeScale(1, 1, 1);
-                         holeyView.holeFrame = dialogView.frame;
                          self.backgroundColor = dimColor;
                      }
                      completion:^(BOOL finished){
                          self.backgroundColor = [UIColor clearColor];
+                         dialogView.backgroundColor = [UIColor clearColor];
+                         holeyView.holeFrame = dialogView.frame;
                          [self addSubview:holeyView];
                      }
      ];
@@ -251,6 +251,7 @@ UIColor *seperatorColor;
     
     // Add the custom container if there is any
     [dialogContainer.contentView addSubview:containerView];
+    dialogContainer.backgroundColor = [UIColor whiteColor];
     
     // Add the buttons too
     [self addButtonsToView:dialogContainer.contentView];
