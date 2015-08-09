@@ -1,6 +1,9 @@
+##Freddie's comment
+This is the fork of [Custom iOS AlertView](https://github.com/wimagguc/ios-custom-alertview), change some styles and add blur effect 
+
 # Custom iOS AlertView
 
-`v0.9.3`
+`v0.9.5`
 
 `support for both iOS7 and iOS8`
 
@@ -20,7 +23,7 @@ As simple as adding the following files to your project:
 Or use Cocoapods:
 
 ```
-pod 'CustomIOSAlertView', '~> 0.9.3'
+pod 'CustomIOSAlertView', :git => 'https://github.com/wangyung/ios-custom-alertview.git' 
 ```
 
 ## Change notes
