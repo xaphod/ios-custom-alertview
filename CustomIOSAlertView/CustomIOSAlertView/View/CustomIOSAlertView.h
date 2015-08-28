@@ -13,11 +13,9 @@
 
 @protocol CustomIOSAlertViewDelegate
 
-- (void)dialogButtonTouchUpInside:(id)alertView clickedButtonAtIndex:(NSInteger)buttonIndex;
+- (void)customIOS7dialogButtonTouchUpInside:(id)alertView clickedButtonAtIndex:(NSInteger)buttonIndex;
 
 @end
-
-typedef void (^ButtonStyleHandler)(UIButton *button);
 
 @interface CustomIOSAlertView : UIView<CustomIOSAlertViewDelegate>
 
@@ -26,7 +24,7 @@ typedef void (^ButtonStyleHandler)(UIButton *button);
 @property (nonatomic, retain) UIView *containerView; // Container within the dialog (place your ui elements here)
 
 @property (nonatomic, assign) id<CustomIOSAlertViewDelegate> delegate;
-@property (nonatomic, retain) NSMutableArray *buttonTitles;
+@property (nonatomic, retain) NSArray *buttonTitles;
 @property (nonatomic, assign) BOOL useMotionEffects;
 
 @property (copy) void (^onButtonTouchUpInside)(CustomIOSAlertView *alertView, int buttonIndex) ;
@@ -41,13 +39,12 @@ typedef void (^ButtonStyleHandler)(UIButton *button);
 - (void)show;
 - (void)close;
 
-- (IBAction)dialogButtonTouchUpInside:(id)sender;
+- (IBAction)customIOS7dialogButtonTouchUpInside:(id)sender;
 - (void)setOnButtonTouchUpInside:(void (^)(CustomIOSAlertView *alertView, int buttonIndex))onButtonTouchUpInside;
 
 - (void)deviceOrientationDidChange: (NSNotification *)notification;
-
-- (void)addButtonWithTitle:(NSString *)title styleHandler: (ButtonStyleHandler) styleHandler;
-
 - (void)dealloc;
+
+- (void)simpleLabelAlertWithText:(NSString*)text font:(UIFont*)font;
 
 @end

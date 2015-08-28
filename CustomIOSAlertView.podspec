@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "CustomIOSAlertView"
-  s.version      = "0.9.5"
+  s.version      = "0.9.6"
   s.summary      = "Custom UIAlertView. Continue adding images and UIViews to dialogs on iOS7 and iOS8 as well."
 
   s.description  = <<-DESC
