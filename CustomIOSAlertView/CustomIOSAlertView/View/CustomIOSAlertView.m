@@ -46,7 +46,7 @@ CGFloat buttonSpacerHeight = 0;
 
         delegate = self;
         useMotionEffects = false;
-        buttonTitles = @[@"Close"];
+        buttonTitles = @[@"OK"];
         
         [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 
@@ -325,7 +325,7 @@ CGFloat buttonSpacerHeight = 0;
         [closeButton setTitle:[buttonTitles objectAtIndex:i] forState:UIControlStateNormal];
         [closeButton setTitleColor:[UIColor colorWithRed:0.0f green:0.5f blue:1.0f alpha:1.0f] forState:UIControlStateNormal];
         [closeButton setTitleColor:[UIColor colorWithRed:0.2f green:0.2f blue:0.2f alpha:0.5f] forState:UIControlStateHighlighted];
-        [closeButton.titleLabel setFont:[UIFont boldSystemFontOfSize:14.0f]];
+        [closeButton.titleLabel setFont:kButtonFont];
         [closeButton.layer setCornerRadius:kCustomIOSAlertViewCornerRadius];
 
         [container addSubview:closeButton];
@@ -507,8 +507,14 @@ CGFloat buttonSpacerHeight = 0;
 	 ];
 }
 
-- (void)simpleLabelAlertWithText:(NSString*)text font:(UIFont*)font
+- (void)simpleLabelAlertWithText:(NSString*)text font:(UIFont*)fontIn
 {
+    UIFont *font;
+    if( fontIn )
+        font = fontIn;
+    else
+        font = kLabelFont;
+    
     CGFloat desiredWidth = [UIScreen mainScreen].bounds.size.width * 0.8f;
     CGFloat borderLeftRight = 20.0;
     CGFloat borderTopBottom = 20.0;
@@ -518,6 +524,7 @@ CGFloat buttonSpacerHeight = 0;
     label.text = text;
     label.numberOfLines = 0;
     label.font = font;
+    
     label.textAlignment = NSTextAlignmentCenter;
     // calc label height using frame's width minus constraints
     UIView *dView = [[UIView alloc] initWithFrame:CGRectMake(0,0, desiredWidth, labelSize.height + 2*borderTopBottom)];

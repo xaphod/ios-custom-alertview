@@ -11,6 +11,10 @@
 
 #import <UIKit/UIKit.h>
 
+// Defaults
+#define kButtonFont [UIFont boldSystemFontOfSize:14.0f] // TODO: make the right font
+#define kLabelFont [UIFont fontWithName:@"OpenSans" size:14.0] // TODO: make the right default font
+
 @protocol CustomIOSAlertViewDelegate
 
 - (void)customIOS7dialogButtonTouchUpInside:(id)alertView clickedButtonAtIndex:(NSInteger)buttonIndex;
