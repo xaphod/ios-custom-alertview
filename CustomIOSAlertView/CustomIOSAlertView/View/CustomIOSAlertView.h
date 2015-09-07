@@ -12,8 +12,8 @@
 #import <UIKit/UIKit.h>
 
 // Defaults
-#define kButtonFont [UIFont boldSystemFontOfSize:14.0f] // TODO: make the right font
-#define kLabelFont [UIFont fontWithName:@"OpenSans" size:14.0] // TODO: make the right default font
+#define kButtonFont [UIFont fontWithName:@"SFUIText-Regular" size:16.0]
+#define kLabelFont [UIFont fontWithName:@"SFUIText-Regular" size:16.0]
 
 @protocol CustomIOSAlertViewDelegate
 
