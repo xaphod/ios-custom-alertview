@@ -1,5 +1,23 @@
-##Freddie's comment
-This is the fork of [Custom iOS AlertView](https://github.com/wimagguc/ios-custom-alertview), change some styles and add blur effect 
+## COMMENT FROM XAPHOD
+This is my fork of [Custom iOS AlertView](https://github.com/wimagguc/ios-custom-alertview)
+There are 2 main additions to my version:
+
+* 2 convenience methods for quickly creating alertviews:
+
+    ```
+    - (void)simpleLabelAlertWithText:(NSString*)text font:(UIFont*)font;
+    ```
+
+Creates an alert that resizes itself according to the text content using the font given. Font can be nil (a hardcoded default will be used). Note that text length should not exceed the amount that is displayable on device screen at the font given.
+    
+    ```
+    - (void)simpleTextViewAlertWithText:(NSString*)text font:(UIFont*)font;
+    ```
+
+Creates an almost full-screen alert with the text in a scrollview (UITextView). Useful for when you have a lot of text to show. Font can be nil (a hardcoded default will be used).
+    
+* The view behind the alert is nicely blurred (automatic)
+
 
 # Custom iOS AlertView
 
