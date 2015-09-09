@@ -51,4 +51,6 @@
 
 - (void)simpleLabelAlertWithText:(NSString*)text font:(UIFont*)font;
 
+- (void)simpleTextViewAlertWithText:(NSString*)text font:(UIFont*)fontIn;
+
 @end

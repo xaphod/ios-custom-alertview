@@ -507,8 +507,7 @@ CGFloat buttonSpacerHeight = 0;
 	 ];
 }
 
-- (void)simpleLabelAlertWithText:(NSString*)text font:(UIFont*)fontIn
-{
+- (void)simpleLabelAlertWithText:(NSString*)text font:(UIFont*)fontIn {
     UIFont *font;
     if( fontIn )
         font = fontIn;
@@ -532,6 +531,22 @@ CGFloat buttonSpacerHeight = 0;
     
     // entire view will be drawn around the width of containerView
     self.containerView = dView;
+}
+
+- (void)simpleTextViewAlertWithText:(NSString*)text font:(UIFont*)fontIn {
+    UIFont *font;
+    if( fontIn )
+        font = fontIn;
+    else
+        font = kLabelFont;
+    
+    UITextView *textview = [[UITextView alloc] initWithFrame:CGRectMake(0,0, [UIScreen mainScreen].bounds.size.width * 0.8f, [UIScreen mainScreen].bounds.size.height * 0.75f)];
+    textview.font = font;
+    textview.editable = NO;
+    textview.text = text;
+    textview.textContainerInset = UIEdgeInsetsMake(10, 10, 10, 10);
+    textview.backgroundColor = [UIColor clearColor];
+    self.containerView = textview;
 }
 
 - (void)getBlurBackground:(void(^)(UIImage *image))completionBlock {
