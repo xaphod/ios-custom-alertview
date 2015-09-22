@@ -11,7 +11,6 @@
 
 #import "CustomIOSAlertView.h"
 #import <QuartzCore/QuartzCore.h>
-#import "UIImage+StackBlur.h"
 
 const static CGFloat kCustomIOSAlertViewDefaultButtonHeight       = 50;
 const static CGFloat kCustomIOSAlertViewDefaultButtonSpacerHeight = 1;
@@ -553,7 +552,7 @@ CGFloat buttonSpacerHeight = 0;
     if( !completionBlock )
         return;
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         // source: http://www.youtube.com/watch?feature=player_embedded&v=JIdcYbAd-NI
         // source2: http://stackoverflow.com/questions/12910625/cigaussianblur-and-ciaffineclamp-on-ios-6
         // source3: http://www.tnoda.com/blog/2013-05-26
@@ -581,12 +580,6 @@ CGFloat buttonSpacerHeight = 0;
         [view.layer renderInContext:ctxt];
         UIImage *viewImg = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
-        
-//      //  Stack blur
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            completionBlock([viewImg stackBlur:15]);
-//        });
-//        
         
         //Blur the image
         CIImage *blurImg = [CIImage imageWithCGImage:viewImg.CGImage];
