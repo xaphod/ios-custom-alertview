@@ -561,14 +561,24 @@ CGFloat buttonSpacerHeight = 0;
         UIWindow *window = [[UIApplication sharedApplication] keyWindow];
         UIView *view = window.rootViewController.view;
         if( !view ) {
-            completionBlock(nil);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completionBlock(nil);
+            });
             return;
         }
         
         NSDate *perf = [NSDate date];
         //Get a screen capture from the current view.
         UIGraphicsBeginImageContext(view.bounds.size);
-        [view.layer renderInContext:UIGraphicsGetCurrentContext()];
+        CGContextRef ctxt = UIGraphicsGetCurrentContext();
+        if( !ctxt ) {
+            UIGraphicsEndImageContext();
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completionBlock(nil);
+            });
+            return;
+        }
+        [view.layer renderInContext:ctxt];
         UIImage *viewImg = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
         
