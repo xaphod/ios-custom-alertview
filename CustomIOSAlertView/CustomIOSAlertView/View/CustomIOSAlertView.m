@@ -57,93 +57,92 @@ CGFloat buttonSpacerHeight = 0;
 }
 
 // Create the dialog view, and animate opening the dialog
-- (void)show
-{
-    [self getBlurBackground:^(UIImage *image) {
-        UIImageView* blurView = [[UIImageView alloc] initWithFrame:self.bounds];
-        blurView.image = image;
-        [self addSubview:blurView];
-        
-        // add 40% black to make it darker
-        UIView *blackView = [[UIView alloc] initWithFrame:self.bounds];
-        blackView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.4];
-        [self addSubview:blackView];
-
-        dialogView = [self createContainerView];
-        
-        dialogView.layer.shouldRasterize = YES;
-        dialogView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
-        
-        self.layer.shouldRasterize = YES;
-        self.layer.rasterizationScale = [[UIScreen mainScreen] scale];
-        
+- (void)show {
+    
+    UIBlurEffect *blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+    UIVisualEffectView *blurView = [[UIVisualEffectView alloc] initWithEffect:blur];
+    [blurView setFrame:self.bounds];
+    [self addSubview:blurView];
+    
+    // add 40% black to make it darker
+    //        UIView *blackView = [[UIView alloc] initWithFrame:self.bounds];
+    //        blackView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.4];
+    //        [self addSubview:blackView];
+    
+    dialogView = [self createContainerView];
+    
+    dialogView.layer.shouldRasterize = YES;
+    dialogView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+    
+    self.layer.shouldRasterize = YES;
+    self.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+    
 #if (defined(__IPHONE_7_0))
-        if (useMotionEffects) {
-            [self applyMotionEffects];
-        }
+    if (useMotionEffects) {
+        [self applyMotionEffects];
+    }
 #endif
+    
+    self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
+    
+    [self addSubview:dialogView];
+    
+    // Can be attached to a view or to the top most window
+    // Attached to a view:
+    if (parentView != NULL) {
+        [parentView addSubview:self];
         
-        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
+        // Attached to the top most window
+    } else {
         
-        [self addSubview:dialogView];
-        
-        // Can be attached to a view or to the top most window
-        // Attached to a view:
-        if (parentView != NULL) {
-            [parentView addSubview:self];
+        // On iOS7, calculate with orientation
+        if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_7_1) {
             
-            // Attached to the top most window
-        } else {
-            
-            // On iOS7, calculate with orientation
-            if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_7_1) {
-                
-                UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
-                switch (interfaceOrientation) {
-                    case UIInterfaceOrientationLandscapeLeft:
-                        self.transform = CGAffineTransformMakeRotation(M_PI * 270.0 / 180.0);
-                        break;
-                        
-                    case UIInterfaceOrientationLandscapeRight:
-                        self.transform = CGAffineTransformMakeRotation(M_PI * 90.0 / 180.0);
-                        break;
-                        
-                    case UIInterfaceOrientationPortraitUpsideDown:
-                        self.transform = CGAffineTransformMakeRotation(M_PI * 180.0 / 180.0);
-                        break;
-                        
-                    default:
-                        break;
-                }
-                
-                [self setFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
-                
-                // On iOS8, just place the dialog in the middle
-            } else {
-                
-                CGSize screenSize = [self countScreenSize];
-                CGSize dialogSize = [self countDialogSize];
-                CGSize keyboardSize = CGSizeMake(0, 0);
-                
-                dialogView.frame = CGRectMake((screenSize.width - dialogSize.width) / 2, (screenSize.height - keyboardSize.height - dialogSize.height) / 2, dialogSize.width, dialogSize.height);
-                
+            UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+            switch (interfaceOrientation) {
+                case UIInterfaceOrientationLandscapeLeft:
+                    self.transform = CGAffineTransformMakeRotation(M_PI * 270.0 / 180.0);
+                    break;
+                    
+                case UIInterfaceOrientationLandscapeRight:
+                    self.transform = CGAffineTransformMakeRotation(M_PI * 90.0 / 180.0);
+                    break;
+                    
+                case UIInterfaceOrientationPortraitUpsideDown:
+                    self.transform = CGAffineTransformMakeRotation(M_PI * 180.0 / 180.0);
+                    break;
+                    
+                default:
+                    break;
             }
             
-            [[[UIApplication sharedApplication] keyWindow] addSubview:self];
+            [self setFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
+            
+            // On iOS8, just place the dialog in the middle
+        } else {
+            
+            CGSize screenSize = [self countScreenSize];
+            CGSize dialogSize = [self countDialogSize];
+            CGSize keyboardSize = CGSizeMake(0, 0);
+            
+            dialogView.frame = CGRectMake((screenSize.width - dialogSize.width) / 2, (screenSize.height - keyboardSize.height - dialogSize.height) / 2, dialogSize.width, dialogSize.height);
+            
         }
         
-        dialogView.layer.opacity = 1.0f;
-        dialogView.layer.transform = CATransform3DMakeScale(1.3f, 1.3f, 1.0f);
-        
-        [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
-                         animations:^{
-                             
-                             dialogView.layer.transform = CATransform3DMakeScale(1, 1, 1);
-                         }
-                         completion:^(BOOL finished){
-                         }
-         ];
-    }];
+        [[[UIApplication sharedApplication] keyWindow] addSubview:self];
+    }
+    
+    dialogView.layer.opacity = 1.0f;
+    dialogView.layer.transform = CATransform3DMakeScale(1.3f, 1.3f, 1.0f);
+    
+    [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
+                     animations:^{
+                         
+                         dialogView.layer.transform = CATransform3DMakeScale(1, 1, 1);
+                     }
+                     completion:^(BOOL finished){
+                     }
+     ];
 }
 
 // Button has been touched
@@ -548,7 +547,7 @@ CGFloat buttonSpacerHeight = 0;
     self.containerView = textview;
 }
 
-- (void)getBlurBackground:(void(^)(UIImage *image))completionBlock {
+- (void)getBlurBackgroundSLOW:(void(^)(UIImage *image))completionBlock {
     if( !completionBlock )
         return;
     
@@ -602,7 +601,6 @@ CGFloat buttonSpacerHeight = 0;
 //        CGImageRelease(cgImg);
         NSLog(@"Async CIAffine/Clamp/GaussianBlur end: took %.2lf sec", ABS([perf timeIntervalSinceNow]));
     });
-
 }
 
 @end
