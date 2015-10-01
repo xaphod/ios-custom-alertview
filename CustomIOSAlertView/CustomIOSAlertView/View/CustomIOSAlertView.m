@@ -22,20 +22,10 @@ const static CGFloat kCustomIOS7MotionEffectExtent                = 10.0;
 CGFloat buttonHeight = 0;
 CGFloat buttonSpacerHeight = 0;
 
-@synthesize parentView, containerView, dialogView, onButtonTouchUpInside;
+@synthesize containerView, dialogView, onButtonTouchUpInside;
 @synthesize delegate;
 @synthesize buttonTitles;
 @synthesize useMotionEffects;
-
-- (id)initWithParentView: (UIView *)_parentView
-{
-    self = [self init];
-    if (_parentView) {
-        self.frame = _parentView.frame;
-        self.parentView = _parentView;
-    }
-    return self;
-}
 
 - (id)init
 {
@@ -44,7 +34,7 @@ CGFloat buttonSpacerHeight = 0;
         self.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
 
         delegate = self;
-        useMotionEffects = false;
+        useMotionEffects = false; // they don't work with the blurring
         buttonTitles = @[@"OK"];
         
         [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
@@ -59,23 +49,14 @@ CGFloat buttonSpacerHeight = 0;
 // Create the dialog view, and animate opening the dialog
 - (void)show {
     
+    self.backgroundColor = [UIColor clearColor];
+    
     UIBlurEffect *blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
     UIVisualEffectView *blurView = [[UIVisualEffectView alloc] initWithEffect:blur];
     [blurView setFrame:self.bounds];
     [self addSubview:blurView];
     
-    // add 40% black to make it darker
-    //        UIView *blackView = [[UIView alloc] initWithFrame:self.bounds];
-    //        blackView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.4];
-    //        [self addSubview:blackView];
-    
-    dialogView = [self createContainerView];
-    
-    dialogView.layer.shouldRasterize = YES;
-    dialogView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
-    
-    self.layer.shouldRasterize = YES;
-    self.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+    dialogView = [self createDialogView];
     
 #if (defined(__IPHONE_7_0))
     if (useMotionEffects) {
@@ -83,54 +64,43 @@ CGFloat buttonSpacerHeight = 0;
     }
 #endif
     
-    self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
+    [blurView.contentView addSubview:dialogView];
     
-    [self addSubview:dialogView];
-    
-    // Can be attached to a view or to the top most window
-    // Attached to a view:
-    if (parentView != NULL) {
-        [parentView addSubview:self];
+    // On iOS7, calculate with orientation
+    if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_7_1) {
         
-        // Attached to the top most window
-    } else {
-        
-        // On iOS7, calculate with orientation
-        if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_7_1) {
-            
-            UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
-            switch (interfaceOrientation) {
-                case UIInterfaceOrientationLandscapeLeft:
-                    self.transform = CGAffineTransformMakeRotation(M_PI * 270.0 / 180.0);
-                    break;
-                    
-                case UIInterfaceOrientationLandscapeRight:
-                    self.transform = CGAffineTransformMakeRotation(M_PI * 90.0 / 180.0);
-                    break;
-                    
-                case UIInterfaceOrientationPortraitUpsideDown:
-                    self.transform = CGAffineTransformMakeRotation(M_PI * 180.0 / 180.0);
-                    break;
-                    
-                default:
-                    break;
-            }
-            
-            [self setFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
-            
-            // On iOS8, just place the dialog in the middle
-        } else {
-            
-            CGSize screenSize = [self countScreenSize];
-            CGSize dialogSize = [self countDialogSize];
-            CGSize keyboardSize = CGSizeMake(0, 0);
-            
-            dialogView.frame = CGRectMake((screenSize.width - dialogSize.width) / 2, (screenSize.height - keyboardSize.height - dialogSize.height) / 2, dialogSize.width, dialogSize.height);
-            
+        UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+        switch (interfaceOrientation) {
+            case UIInterfaceOrientationLandscapeLeft:
+                self.transform = CGAffineTransformMakeRotation(M_PI * 270.0 / 180.0);
+                break;
+                
+            case UIInterfaceOrientationLandscapeRight:
+                self.transform = CGAffineTransformMakeRotation(M_PI * 90.0 / 180.0);
+                break;
+                
+            case UIInterfaceOrientationPortraitUpsideDown:
+                self.transform = CGAffineTransformMakeRotation(M_PI * 180.0 / 180.0);
+                break;
+                
+            default:
+                break;
         }
         
-        [[[UIApplication sharedApplication] keyWindow] addSubview:self];
+        [self setFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
+        
+        // On iOS8, just place the dialog in the middle
+    } else {
+        
+        CGSize screenSize = [self countScreenSize];
+        CGSize dialogSize = [self countDialogSize];
+        CGSize keyboardSize = CGSizeMake(0, 0);
+        
+        dialogView.frame = CGRectMake((screenSize.width - dialogSize.width) / 2, (screenSize.height - keyboardSize.height - dialogSize.height) / 2, dialogSize.width, dialogSize.height);
+        
     }
+    
+    [[[UIApplication sharedApplication] keyWindow] addSubview:self];
     
     dialogView.layer.opacity = 1.0f;
     dialogView.layer.transform = CATransform3DMakeScale(1.3f, 1.3f, 1.0f);
@@ -198,59 +168,8 @@ CGFloat buttonSpacerHeight = 0;
     containerView = subView;
 }
 
-// Creates the container view here: create the dialog, then add the custom content and buttons
-- (UIView *)createContainerView
-{
-    // ORIG
-//    if (containerView == NULL) {
-//        containerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 150)];
-//    }
-//
-//    CGSize screenSize = [self countScreenSize];
-//    CGSize dialogSize = [self countDialogSize];
-//
-//    // For the black background
-//    [self setFrame:CGRectMake(0, 0, screenSize.width, screenSize.height)];
-//
-//    // This is the dialog's container; we attach the custom content and the buttons to this one
-//    UIView *dialogContainer = [[UIView alloc] initWithFrame:CGRectMake((screenSize.width - dialogSize.width) / 2, (screenSize.height - dialogSize.height) / 2, dialogSize.width, dialogSize.height)];
-//
-//    // First, we style the dialog to match the iOS7 UIAlertView >>>
-//    CAGradientLayer *gradient = [CAGradientLayer layer];
-//    gradient.frame = dialogContainer.bounds;
-//    gradient.colors = [NSArray arrayWithObjects:
-//                       (id)[[UIColor colorWithRed:218.0/255.0 green:218.0/255.0 blue:218.0/255.0 alpha:1.0f] CGColor],
-//                       (id)[[UIColor colorWithRed:233.0/255.0 green:233.0/255.0 blue:233.0/255.0 alpha:1.0f] CGColor],
-//                       (id)[[UIColor colorWithRed:218.0/255.0 green:218.0/255.0 blue:218.0/255.0 alpha:1.0f] CGColor],
-//                       nil];
-//
-//    CGFloat cornerRadius = kCustomIOSAlertViewCornerRadius;
-//    gradient.cornerRadius = cornerRadius;
-//    [dialogContainer.layer insertSublayer:gradient atIndex:0];
-//
-//    dialogContainer.layer.cornerRadius = cornerRadius;
-//    dialogContainer.layer.borderColor = [[UIColor colorWithRed:198.0/255.0 green:198.0/255.0 blue:198.0/255.0 alpha:1.0f] CGColor];
-//    dialogContainer.layer.borderWidth = 0;
-//    dialogContainer.layer.shadowRadius = cornerRadius + 5;
-//    dialogContainer.layer.shadowOpacity = 0.1f;
-//    dialogContainer.layer.shadowOffset = CGSizeMake(0 - (cornerRadius+5)/2, 0 - (cornerRadius+5)/2);
-//    dialogContainer.layer.shadowColor = [UIColor blackColor].CGColor;
-//    dialogContainer.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:dialogContainer.bounds cornerRadius:dialogContainer.layer.cornerRadius].CGPath;
-//
-//    // There is a line above the button
-//    UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(0, dialogContainer.bounds.size.height - buttonHeight - buttonSpacerHeight, dialogContainer.bounds.size.width, buttonSpacerHeight)];
-//    lineView.backgroundColor = [UIColor colorWithRed:198.0/255.0 green:198.0/255.0 blue:198.0/255.0 alpha:1.0f];
-//    [dialogContainer addSubview:lineView];
-//    // ^^^
-//
-//    // Add the custom container if there is any
-//    [dialogContainer addSubview:containerView];
-//
-//    // Add the buttons too
-//    [self addButtonsToView:dialogContainer];
-//
-//    return dialogContainer;
-    
+// dialog contains the container view, container view contains the textview or alertlabel etc (what caller created)
+- (UIView *)createDialogView {
     if (containerView == NULL) {
         containerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 150)];
     }
@@ -258,32 +177,26 @@ CGFloat buttonSpacerHeight = 0;
     CGSize screenSize = [self countScreenSize];
     CGSize dialogSize = [self countDialogSize];
     
-    // For the black background
-    [self setFrame:CGRectMake(0, 0, screenSize.width, screenSize.height)];
-    
     // This is the dialog's container; we attach the custom content and the buttons to this one
     
-    UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
-    
-    UIVisualEffectView *dialogContainer = [[UIVisualEffectView alloc] initWithEffect: blurEffect];
-    [dialogContainer setFrame: CGRectMake((screenSize.width - dialogSize.width) / 2, (screenSize.height - dialogSize.height) / 2, dialogSize.width, dialogSize.height)];
+    UIView *dialogContainer = [[UIView alloc] initWithFrame:CGRectMake((screenSize.width - dialogSize.width) / 2, (screenSize.height - dialogSize.height) / 2, dialogSize.width, dialogSize.height)];
     
     CGFloat cornerRadius = kCustomIOSAlertViewCornerRadius;
     dialogContainer.layer.cornerRadius = cornerRadius;
     dialogContainer.clipsToBounds = YES;
     
-    dialogContainer.contentView.layer.cornerRadius = cornerRadius;
-    dialogContainer.contentView.layer.shadowRadius = cornerRadius + 5;
-    dialogContainer.contentView.layer.shadowOpacity = 0.1f;
-    dialogContainer.contentView.layer.shadowOffset = CGSizeMake(0 - (cornerRadius+5)/2, 0 - (cornerRadius+5)/2);
-    dialogContainer.contentView.layer.shadowColor = [UIColor blackColor].CGColor;
-    dialogContainer.contentView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:dialogContainer.bounds cornerRadius:dialogContainer.layer.cornerRadius].CGPath;
+    dialogContainer.layer.cornerRadius = cornerRadius;
+    dialogContainer.layer.shadowRadius = cornerRadius + 5;
+    dialogContainer.layer.shadowOpacity = 0.1f;
+    dialogContainer.layer.shadowOffset = CGSizeMake(0 - (cornerRadius+5)/2, 0 - (cornerRadius+5)/2);
+    dialogContainer.layer.shadowColor = [UIColor blackColor].CGColor;
+    dialogContainer.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:dialogContainer.bounds cornerRadius:dialogContainer.layer.cornerRadius].CGPath;
     
     // There is a line above the button
     UIColor *seperatorColor = [UIColor colorWithRed:198.0/255.0 green:198.0/255.0 blue:198.0/255.0 alpha:1.0f];
     UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(0, dialogContainer.bounds.size.height - buttonHeight - buttonSpacerHeight, dialogContainer.bounds.size.width, buttonSpacerHeight)];
     lineView.backgroundColor = seperatorColor;
-    [dialogContainer.contentView addSubview:lineView];
+    [dialogContainer addSubview:lineView];
     
     // There are also vertical lines between the buttons
     if (buttonTitles.count > 1) {
@@ -294,12 +207,12 @@ CGFloat buttonSpacerHeight = 0;
         }
     }
     
-    // Add the custom container if there is any
-    [dialogContainer.contentView addSubview:containerView];
+    // Add the containerView
+    [dialogContainer addSubview:containerView];
     dialogContainer.backgroundColor = [UIColor whiteColor];
     
     // Add the buttons too
-    [self addButtonsToView:dialogContainer.contentView];
+    [self addButtonsToView:dialogContainer];
     
     return dialogContainer;
 }
@@ -458,11 +371,6 @@ CGFloat buttonSpacerHeight = 0;
 // Handle device orientation changes
 - (void)deviceOrientationDidChange: (NSNotification *)notification
 {
-    // If dialog is attached to the parent view, it probably wants to handle the orientation change itself
-    if (parentView != NULL) {
-        return;
-    }
-
     if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_7_1) {
         [self changeOrientationForIOS7];
     } else {
