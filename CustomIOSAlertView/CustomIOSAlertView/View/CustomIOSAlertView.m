@@ -445,10 +445,18 @@ CGFloat buttonSpacerHeight = 0;
         font = fontIn;
     else
         font = kLabelFont;
+
+    CGFloat fixedWidth = [UIScreen mainScreen].bounds.size.width * 0.8f - 20; // - 20 for insets made below
+    CGFloat maxHeight = [UIScreen mainScreen].bounds.size.height * 0.75f;
+    CGSize maxSize = CGSizeMake(fixedWidth, CGFLOAT_MAX);
+    CGSize requiredSize = [text boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{ NSFontAttributeName : font } context:nil].size;
+    requiredSize.height = requiredSize.height + 20; // for insets
+    CGFloat actualHeight = MIN(requiredSize.height, maxHeight);
     
-    UITextView *textview = [[UITextView alloc] initWithFrame:CGRectMake(0,0, [UIScreen mainScreen].bounds.size.width * 0.8f, [UIScreen mainScreen].bounds.size.height * 0.75f)];
+    UITextView *textview = [[UITextView alloc] initWithFrame:CGRectMake(0, 0, fixedWidth, actualHeight)];
     textview.font = font;
     textview.editable = NO;
+    textview.dataDetectorTypes = UIDataDetectorTypePhoneNumber | UIDataDetectorTypeLink;
     textview.text = text;
     textview.textContainerInset = UIEdgeInsetsMake(10, 10, 10, 10);
     textview.backgroundColor = [UIColor clearColor];
