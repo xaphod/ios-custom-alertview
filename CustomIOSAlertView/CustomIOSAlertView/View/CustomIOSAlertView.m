@@ -448,18 +448,20 @@ CGFloat buttonSpacerHeight = 0;
 
     CGFloat fixedWidth = [UIScreen mainScreen].bounds.size.width * 0.8f - 20; // - 20 for insets made below
     CGFloat maxHeight = [UIScreen mainScreen].bounds.size.height * 0.75f;
-    CGSize maxSize = CGSizeMake(fixedWidth, CGFLOAT_MAX);
-    CGSize requiredSize = [text boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{ NSFontAttributeName : font } context:nil].size;
-    requiredSize.height = requiredSize.height + 20; // for insets
-    CGFloat actualHeight = MIN(requiredSize.height, maxHeight);
     
-    UITextView *textview = [[UITextView alloc] initWithFrame:CGRectMake(0, 0, fixedWidth, actualHeight)];
+    UITextView *textview = [[UITextView alloc] init];
     textview.font = font;
     textview.editable = NO;
     textview.dataDetectorTypes = UIDataDetectorTypePhoneNumber | UIDataDetectorTypeLink;
     textview.text = text;
-    textview.textContainerInset = UIEdgeInsetsMake(10, 10, 10, 10);
+    textview.textContainerInset = UIEdgeInsetsMake(20, 10, 20, 10);
     textview.backgroundColor = [UIColor clearColor];
+    
+    CGFloat height = [textview sizeThatFits:CGSizeMake(fixedWidth, CGFLOAT_MAX)].height; // insets are included by function
+    height = MIN(height, maxHeight);
+    height = MAX(height, kCustomIOSAlertViewDefaultButtonHeight);
+    textview.frame = CGRectMake(0, 0, fixedWidth, height);
+
     self.containerView = textview;
 }
 
